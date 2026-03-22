@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF→IFC 簡易3D立ち上げ PoC</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>PDF図面 → IFC 3D壁モデル生成</h1>
+  </header>
+
+  <main>
+    <section class="canvas-area">
+      <div class="canvas-toolbar">
+        <label class="file-label">
+          図面画像を読み込む
+          <input type="file" id="imageInput" accept="image/*" />
+        </label>
+        <button id="undoBtn" title="直前の壁を取消">↩ 元に戻す</button>
+        <button id="clearBtn" title="全壁を削除">🗑 すべてクリア</button>
+        <span id="wallCount">壁: 0</span>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas id="drawCanvas" width="900" height="600"></canvas>
+        <p class="hint">クリックで始点→終点を指定して壁を描画します（複数壁を連続追加可能）</p>
+      </div>
+    </section>
+
+    <aside class="params-panel">
+      <h2>パラメータ</h2>
+
+      <div class="field">
+        <label for="wallHeight">壁の高さ (mm)</label>
+        <input type="number" id="wallHeight" value="3000" min="1" step="100" />
+      </div>
+
+      <div class="field">
+        <label for="wallThickness">壁の厚み (mm)</label>
+        <input type="number" id="wallThickness" value="200" min="1" step="10" />
+      </div>
+
+      <div class="field">
+        <label for="scaleFactor">スケール係数</label>
+        <input type="number" id="scaleFactor" value="1.0" min="0.001" step="0.1" />
+      </div>
+
+      <button id="generateBtn" class="primary-btn">IFC 生成 &amp; ダウンロード</button>
+      <p id="statusMsg" class="status"></p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
