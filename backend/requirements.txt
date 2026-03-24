@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 ifcopenshell
 pydantic
+openai
+python-dotenv
