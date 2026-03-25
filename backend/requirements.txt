@@ -4,3 +4,5 @@ ifcopenshell
 pydantic
 openai
 python-dotenv
+opencv-python-headless
+python-multipart

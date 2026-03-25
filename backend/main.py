@@ -4,13 +4,14 @@ import tempfile
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from ai_parser import parse_walls_from_text
 from ifc_generator import generate_ifc
+from image_parser import detect_walls_from_image
 
 load_dotenv()
 
@@ -62,6 +63,17 @@ async def parse_walls_endpoint(req: ParseWallsRequest):
         raise HTTPException(status_code=500, detail=f"AI処理中にエラーが発生しました: {e}")
 
     return result
+
+
+@app.post("/api/detect-lines")
+async def detect_lines_endpoint(file: UploadFile = File(...)):
+    """アップロードされた画像から直線を検出して壁の始点・終点を返す。"""
+    try:
+        image_bytes = await file.read()
+        lines = detect_walls_from_image(image_bytes)
+        return {"lines": lines}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"画像解析に失敗しました: {e}")
 
 
 @app.post("/api/generate-ifc")

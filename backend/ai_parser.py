@@ -102,7 +102,7 @@ def parse_walls_from_text(text: str) -> dict:
     client = OpenAI(api_key=api_key)
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5.4-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": text},
