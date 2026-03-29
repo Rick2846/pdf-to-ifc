@@ -25,6 +25,7 @@
         </label>
         <button id="undoBtn" title="直前の壁を取消">↩ 元に戻す</button>
         <button id="clearBtn" title="全壁を削除">🗑 すべてクリア</button>
+        <button id="autoDetectBtn" title="アップロード画像から壁を自動検出">画像から自動認識</button>
         <span id="wallCount">壁: 0</span>
       </div>
       <div class="canvas-wrapper">
@@ -51,7 +52,8 @@
         <input type="number" id="scaleFactor" value="1.0" min="0.001" step="0.1" />
       </div>
 
-      <button id="generateBtn" class="primary-btn">IFC 生成 &amp; ダウンロード</button>
+      <p id="globalWallCount" class="wall-count-global">合計壁数: 0</p>
+      <button id="generateBtn" class="primary-btn">すべての壁からIFC生成 &amp; ダウンロード</button>
       <p id="statusMsg" class="status"></p>
     </aside>
 
@@ -77,9 +79,6 @@
       <aside class="chat-result-panel" id="chatResultPanel">
         <h2>解析結果</h2>
         <pre id="parsedJson" class="parsed-json">AIの解析結果がここに表示されます</pre>
-        <button id="chatGenerateBtn" class="primary-btn" disabled>
-          この内容でIFC生成 &amp; ダウンロード
-        </button>
         <p id="chatStatusMsg" class="status"></p>
       </aside>
     </section>
