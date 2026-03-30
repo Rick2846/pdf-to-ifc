@@ -3,21 +3,7 @@
 
   const API_BASE = "http://localhost:8000";
   const API_URL = `${API_BASE}/api/generate-ifc`;
-  const PARSE_URL = `${API_BASE}/api/parse-walls`;
   const DETECT_URL = `${API_BASE}/api/detect-lines`;
-
-  // ======== Tab switching ========
-  const tabs = document.querySelectorAll(".tab");
-  const tabContents = document.querySelectorAll(".tab-content");
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => t.classList.remove("active"));
-      tabContents.forEach((c) => c.classList.remove("active"));
-      tab.classList.add("active");
-      document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
-    });
-  });
 
   // ================================================================
   //  Unified wall state
@@ -121,7 +107,11 @@
 
   generateBtn.addEventListener("click", async () => {
     if (globalWalls.length === 0) {
-      setStatus(statusMsg, "壁が1つもありません。Canvasで描画するか、AIチャットで追加してください。", "error");
+      setStatus(
+        statusMsg,
+        "壁が1つもありません。Canvasで描画するか、「画像から自動認識」で追加してください。",
+        "error"
+      );
       return;
     }
 
@@ -226,83 +216,6 @@
   function updateWallCount() {
     wallCountEl.textContent = `壁: ${globalWalls.length}`;
     globalWallCountEl.textContent = `合計壁数: ${globalWalls.length}`;
-  }
-
-  // ================================================================
-  //  AI Chat
-  // ================================================================
-  const chatForm = document.getElementById("chatForm");
-  const chatInput = document.getElementById("chatInput");
-  const chatSendBtn = document.getElementById("chatSendBtn");
-  const chatMessages = document.getElementById("chatMessages");
-  const parsedJsonEl = document.getElementById("parsedJson");
-  const chatStatusMsg = document.getElementById("chatStatusMsg");
-
-  chatForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    appendChatMsg(text, "user");
-    chatInput.value = "";
-    chatSendBtn.disabled = true;
-    parsedJsonEl.textContent = "解析中…";
-    setStatus(chatStatusMsg, "", "");
-
-    try {
-      const res = await fetch(PARSE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "不明なエラー" }));
-        throw new Error(err.detail || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      const addedCount = data.walls.length;
-      data.walls.forEach((w) => {
-        globalWalls.push({
-          start_point: w.start_point,
-          end_point: w.end_point,
-          height: w.height,
-          thickness: w.thickness,
-        });
-      });
-
-      updateWallCount();
-      redraw();
-
-      const summary = data.walls
-        .map(
-          (w, i) =>
-            `壁${i + 1}: (${w.start_point.x}, ${w.start_point.y}) → (${w.end_point.x}, ${w.end_point.y}), H=${w.height}mm, T=${w.thickness}mm`
-        )
-        .join("\n");
-
-      appendChatMsg(
-        `${addedCount}枚の壁を追加しました（合計${globalWalls.length}枚）:\n${summary}`,
-        "assistant"
-      );
-      parsedJsonEl.textContent = JSON.stringify(data, null, 2);
-      setStatus(chatStatusMsg, `${addedCount}枚の壁をCanvasに追加しました。`, "success");
-    } catch (err) {
-      appendChatMsg(`エラー: ${err.message}`, "error");
-      parsedJsonEl.textContent = "解析に失敗しました";
-    } finally {
-      chatSendBtn.disabled = false;
-    }
-  });
-
-  function appendChatMsg(text, role) {
-    const div = document.createElement("div");
-    div.className = `chat-msg ${role}`;
-    div.textContent = text;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   // ================================================================

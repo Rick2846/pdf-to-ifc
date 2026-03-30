@@ -8,16 +8,11 @@
 </head>
 <body>
   <header>
-    <h1>自然言語・UI操作 → IFC 3D壁モデル生成</h1>
-    <nav class="tab-bar">
-      <button class="tab active" data-tab="canvas">Canvas UI</button>
-      <button class="tab" data-tab="chat">AI チャット</button>
-    </nav>
+    <h1>Canvas UI → IFC 3D壁モデル生成</h1>
   </header>
 
   <main>
-    <!-- ===== Tab 1: Canvas UI ===== -->
-    <section class="canvas-area tab-content active" id="tab-canvas">
+    <section class="canvas-area">
       <div class="canvas-toolbar">
         <label class="file-label">
           図面画像を読み込む
@@ -56,32 +51,6 @@
       <button id="generateBtn" class="primary-btn">すべての壁からIFC生成 &amp; ダウンロード</button>
       <p id="statusMsg" class="status"></p>
     </aside>
-
-    <!-- ===== Tab 2: AI Chat ===== -->
-    <section class="chat-area tab-content" id="tab-chat">
-      <div class="chat-container">
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-msg system">
-            自然言語で壁を記述してください。<br />
-            例: 「高さ3m、幅5mの壁を作って」「L字型の壁を2枚、高さ2.7m、厚さ150mm」
-          </div>
-        </div>
-        <form class="chat-input-area" id="chatForm">
-          <input
-            type="text"
-            id="chatInput"
-            placeholder="壁の説明を入力… 例: 高さ3m、幅5mの壁を作って"
-            autocomplete="off"
-          />
-          <button type="submit" id="chatSendBtn" class="primary-btn">送信</button>
-        </form>
-      </div>
-      <aside class="chat-result-panel" id="chatResultPanel">
-        <h2>解析結果</h2>
-        <pre id="parsedJson" class="parsed-json">AIの解析結果がここに表示されます</pre>
-        <p id="chatStatusMsg" class="status"></p>
-      </aside>
-    </section>
   </main>
 
   <script src="app.js"></script>
