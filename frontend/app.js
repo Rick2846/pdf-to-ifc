@@ -32,15 +32,18 @@
   imageInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.type !== "application/pdf") {
+      setStatus(statusMsg, "PDFファイルのみ選択できます。", "error");
+      e.target.value = "";
+      uploadedFile = null;
+      return;
+    }
     uploadedFile = file;
-    const img = new Image();
-    img.onload = () => {
-      bgImage = img;
-      canvas.width = img.width;
-      canvas.height = img.height;
-      redraw();
-    };
-    img.src = URL.createObjectURL(file);
+    bgImage = null;
+    canvas.width = 900;
+    canvas.height = 600;
+    redraw();
+    setStatus(statusMsg, "「PDFから自動認識」で解析し、図面を表示します。", "");
   });
 
   canvas.addEventListener("click", (e) => {
@@ -109,7 +112,7 @@
     if (globalWalls.length === 0) {
       setStatus(
         statusMsg,
-        "壁が1つもありません。Canvasで描画するか、「画像から自動認識」で追加してください。",
+        "壁が1つもありません。Canvasで描画するか、「PDFから自動認識」で追加してください。",
         "error"
       );
       return;
@@ -133,7 +136,7 @@
   // ======== Auto-detect from image ========
   autoDetectBtn.addEventListener("click", async () => {
     if (!uploadedFile) {
-      setStatus(statusMsg, "先に「図面画像を読み込む」で画像をアップロードしてください。", "error");
+      setStatus(statusMsg, "先に「PDF図面を読み込む」でPDFを選択してください。", "error");
       return;
     }
 
@@ -141,7 +144,7 @@
     const thickness = parseFloat(document.getElementById("wallThickness").value) || 200;
 
     autoDetectBtn.disabled = true;
-    setStatus(statusMsg, "画像を解析中…", "");
+    setStatus(statusMsg, "PDFを解析中…", "");
 
     try {
       const formData = new FormData();
@@ -158,23 +161,45 @@
       }
 
       const data = await res.json();
-      if (!data.lines || data.lines.length === 0) {
-        setStatus(statusMsg, "線が検出されませんでした。画像を確認してください。", "error");
-        return;
+      if (!data.image) {
+        throw new Error("サーバーからプレビュー画像が返されませんでした。");
       }
 
-      data.lines.forEach((line) => {
-        globalWalls.push({
-          start_point: line.start_point,
-          end_point: line.end_point,
-          height,
-          thickness,
+      const previewImg = await loadDataUrlImage(
+        `data:image/png;base64,${data.image}`
+      );
+      bgImage = previewImg;
+      canvas.width = previewImg.width;
+      canvas.height = previewImg.height;
+
+      const segments = data.walls || [];
+      if (segments.length > 0) {
+        segments.forEach((line) => {
+          globalWalls.push({
+            start_point: line.start_point,
+            end_point: line.end_point,
+            height,
+            thickness,
+          });
         });
-      });
+      }
 
       updateWallCount();
       redraw();
-      setStatus(statusMsg, `${data.lines.length}本の線を検出し、壁データに追加しました。`, "success");
+
+      if (segments.length === 0) {
+        setStatus(
+          statusMsg,
+          "PDFを表示しました。線は検出されませんでした。",
+          "error"
+        );
+      } else {
+        setStatus(
+          statusMsg,
+          `${segments.length}本の線を検出し、壁データに追加しました。`,
+          "success"
+        );
+      }
     } catch (err) {
       setStatus(statusMsg, `自動認識エラー: ${err.message}`, "error");
     } finally {
@@ -258,5 +283,15 @@
   function setStatus(el, msg, type) {
     el.textContent = msg;
     el.className = "status" + (type ? ` ${type}` : "");
+  }
+
+  function loadDataUrlImage(dataUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () =>
+        reject(new Error("プレビュー画像の読み込みに失敗しました。"));
+      img.src = dataUrl;
+    });
   }
 })();

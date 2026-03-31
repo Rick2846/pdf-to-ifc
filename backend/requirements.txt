@@ -4,3 +4,6 @@ ifcopenshell
 pydantic
 opencv-python-headless
 python-multipart
+pdf2image
+torch
+scikit-image
